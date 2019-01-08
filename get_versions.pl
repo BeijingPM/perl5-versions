@@ -4,6 +4,7 @@
 use warnings;
 use strict;
 use LWP::Simple;
+use Sort::Versions;
 
 my $url = "http://www.cpan.org/src/5.0/";
 my $html = get( $url );
@@ -22,5 +23,5 @@ while ($html =~ m|<a href="perl-([^"]+)\.tar\.gz">(.+?)</a>|g) {
 }
 
 open my $fh, ">", "versions.txt" or die "open file error: $!";
-print $fh "$_\n" for @available_versions;
+print $fh "$_\n" for (sort versioncmp @available_versions);
 close $fh;
