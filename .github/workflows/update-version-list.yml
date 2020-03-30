@@ -1,0 +1,36 @@
+name: Update Perl Versions
+
+on: push
+  # schedule:
+  #   - cron: '0 0 * * *'
+
+jobs:
+  update_versions:
+    runs-on: ubuntu-latest
+    name: A job to update Perl version list
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Perl and dependencies
+      run: |
+        curl -L https://github.com/gingerhot/plenv-installer/raw/master/bin/plenv-installer | bash
+        export PATH="$HOME/.plenv/bin:$PATH"
+        plenv install 5.18.0
+        plenv global 5.18.0
+        plenv install-cpanm
+        cpanm install LWP::Simple
+        cpanm install Sort::Versions
+        perl get_versions.pl
+    - name: Git commit
+      run: |
+        # git commit if there's any change
+        if test -n "$(git status --porcelain 2>/dev/null)"; then
+            git config --global user.email "idegorepl@gmail.com"
+            git config --global user.name "B1nj0y"
+            git add .
+            git commit -m "Update Perl version list"
+        fi
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
